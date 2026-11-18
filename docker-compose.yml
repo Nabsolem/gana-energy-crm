@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: gana-energy-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: gana_energy
+      POSTGRES_PASSWORD: gana_energy_dev
+      POSTGRES_DB: gana_energy_crm
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

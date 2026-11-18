@@ -1,0 +1,80 @@
+// use prisma-8
+enum AgentRole {
+  AGENT
+  ADMIN
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  CONTACTED
+  CLOSED
+}
+
+model Agent {
+  id        Int                @id @default(autoincrement())
+  name      String
+  email     String             @unique
+  role      AgentRole          @default(AGENT)
+
+  leads     Lead[]
+
+  createdAt DateTime           @default(now()) @onCreate(now())
+  updatedAt temporal.UpdatedAt
+}
+
+model Lead {
+  id                 Int                @id @default(autoincrement())
+
+  name               String
+  phone              String
+
+  status             LeadStatus         @default(NEW)
+
+  agent              Agent?             @relation(fields: [agentId], references: [id])
+  agentId            Int?
+
+  // Datos utilizados por el motor de scoring
+  isNewCustomer      Boolean
+  commercialInterest Int
+  source             String
+  leadDate           DateTime
+
+  // Control de concurrencia mediante optimistic locking
+  version            Int                @default(1)
+
+  createdAt          DateTime           @default(now()) @onCreate(now())
+  updatedAt          temporal.UpdatedAt
+
+  @@index([status])
+  @@index([agentId])
+  @@index([name])
+  @@index([phone])
+}
+
+model ScoringConfiguration {
+  id        Int                @id @default(autoincrement())
+
+  version   Int                @unique
+  active    Boolean            @default(false)
+
+  criteria  ScoringCriterion[]
+
+  createdAt DateTime           @default(now()) @onCreate(now())
+
+  @@index([active])
+}
+
+model ScoringCriterion {
+  id              Int                  @id @default(autoincrement())
+
+  configuration   ScoringConfiguration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+
+  configurationId Int
+
+  name            String
+  weight          Int
+
+  @@unique([configurationId, name])
+  @@index([configurationId])
+}

@@ -1,0 +1,751 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Agent",
+    "label": "Create table \"Agent\"",
+    "summary": "Creates table \"Agent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Agent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Agent\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Agent\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Agent\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Agent\"",
+        "sql": "CREATE TABLE \"public\".\"Agent\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"role\" text DEFAULT 'AGENT' NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"Agent_role_check_7ef290b3\" CHECK (\"role\" IN ('AGENT', 'ADMIN'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Agent\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Agent\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Agent\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Lead",
+    "label": "Create table \"Lead\"",
+    "summary": "Creates table \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Lead\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Lead\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Lead\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Lead\"",
+        "sql": "CREATE TABLE \"public\".\"Lead\" (\n  \"agentId\" int4,\n  \"commercialInterest\" int4 NOT NULL,\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"isNewCustomer\" bool NOT NULL,\n  \"leadDate\" timestamptz(3) NOT NULL,\n  \"name\" text NOT NULL,\n  \"phone\" text NOT NULL,\n  \"source\" text NOT NULL,\n  \"status\" text DEFAULT 'NEW' NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  \"version\" int4 DEFAULT 1 NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"Lead_status_check_b706e08a\" CHECK (\"status\" IN ('NEW', 'IN_PROGRESS', 'CONTACTED', 'CLOSED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Lead\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Lead\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Lead\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.ScoringConfiguration",
+    "label": "Create table \"ScoringConfiguration\"",
+    "summary": "Creates table \"ScoringConfiguration\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ScoringConfiguration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ScoringConfiguration\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringConfiguration\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"ScoringConfiguration\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ScoringConfiguration\"",
+        "sql": "CREATE TABLE \"public\".\"ScoringConfiguration\" (\n  \"active\" bool DEFAULT false NOT NULL,\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"version\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ScoringConfiguration\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringConfiguration\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"ScoringConfiguration\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.ScoringCriterion",
+    "label": "Create table \"ScoringCriterion\"",
+    "summary": "Creates table \"ScoringCriterion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ScoringCriterion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ScoringCriterion\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringCriterion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"ScoringCriterion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ScoringCriterion\"",
+        "sql": "CREATE TABLE \"public\".\"ScoringCriterion\" (\n  \"configurationId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"weight\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ScoringCriterion\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringCriterion\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"ScoringCriterion\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "unique.Agent.Agent_email_key",
+    "label": "Add unique constraint on \"Agent\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Agent_email_key",
+        "table": "Agent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Agent_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Agent_email_key",
+          "public",
+          "\"public\".\"Agent\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Agent_email_key\" on \"Agent\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Agent_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"Agent\" ADD CONSTRAINT \"Agent_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Agent_email_key\" exists on (email)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Agent_email_key",
+          "public",
+          "\"public\".\"Agent\"",
+          "u",
+          "[\"email\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.ScoringConfiguration.ScoringConfiguration_version_key",
+    "label": "Add unique constraint on \"ScoringConfiguration\" (version)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "ScoringConfiguration_version_key",
+        "table": "ScoringConfiguration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"ScoringConfiguration_version_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "ScoringConfiguration_version_key",
+          "public",
+          "\"public\".\"ScoringConfiguration\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"ScoringConfiguration_version_key\" on \"ScoringConfiguration\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"ScoringConfiguration_version_key\"",
+        "sql": "ALTER TABLE \"public\".\"ScoringConfiguration\" ADD CONSTRAINT \"ScoringConfiguration_version_key\" UNIQUE (\"version\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"ScoringConfiguration_version_key\" exists on (version)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "ScoringConfiguration_version_key",
+          "public",
+          "\"public\".\"ScoringConfiguration\"",
+          "u",
+          "[\"version\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.ScoringCriterion.ScoringCriterion_configurationId_name_key",
+    "label": "Add unique constraint on \"ScoringCriterion\" (configurationId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "ScoringCriterion_configurationId_name_key",
+        "table": "ScoringCriterion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"ScoringCriterion_configurationId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "ScoringCriterion_configurationId_name_key",
+          "public",
+          "\"public\".\"ScoringCriterion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"ScoringCriterion_configurationId_name_key\" on \"ScoringCriterion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"ScoringCriterion_configurationId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"ScoringCriterion\" ADD CONSTRAINT \"ScoringCriterion_configurationId_name_key\" UNIQUE (\"configurationId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"ScoringCriterion_configurationId_name_key\" exists on (configurationId, name)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "ScoringCriterion_configurationId_name_key",
+          "public",
+          "\"public\".\"ScoringCriterion\"",
+          "u",
+          "[\"configurationId\",\"name\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Lead.Lead_agentId_idx_8d0ba4f0",
+    "label": "Create index \"Lead_agentId_idx_8d0ba4f0\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Lead_agentId_idx_8d0ba4f0",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Lead_agentId_idx_8d0ba4f0\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_agentId_idx_8d0ba4f0\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Lead_agentId_idx_8d0ba4f0\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Lead_agentId_idx_8d0ba4f0\"",
+        "sql": "CREATE INDEX \"Lead_agentId_idx_8d0ba4f0\" ON \"public\".\"Lead\" (\"agentId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Lead_agentId_idx_8d0ba4f0\" exists on \"Lead\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_agentId_idx_8d0ba4f0\"",
+          "i",
+          "I",
+          "\"public\".\"Lead\"",
+          "btree",
+          "[\"agentId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Lead.Lead_name_idx_ce87e6ba",
+    "label": "Create index \"Lead_name_idx_ce87e6ba\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Lead_name_idx_ce87e6ba",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Lead_name_idx_ce87e6ba\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_name_idx_ce87e6ba\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Lead_name_idx_ce87e6ba\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Lead_name_idx_ce87e6ba\"",
+        "sql": "CREATE INDEX \"Lead_name_idx_ce87e6ba\" ON \"public\".\"Lead\" (\"name\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Lead_name_idx_ce87e6ba\" exists on \"Lead\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_name_idx_ce87e6ba\"",
+          "i",
+          "I",
+          "\"public\".\"Lead\"",
+          "btree",
+          "[\"name\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Lead.Lead_phone_idx_8db23f45",
+    "label": "Create index \"Lead_phone_idx_8db23f45\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Lead_phone_idx_8db23f45",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Lead_phone_idx_8db23f45\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_phone_idx_8db23f45\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Lead_phone_idx_8db23f45\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Lead_phone_idx_8db23f45\"",
+        "sql": "CREATE INDEX \"Lead_phone_idx_8db23f45\" ON \"public\".\"Lead\" (\"phone\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Lead_phone_idx_8db23f45\" exists on \"Lead\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_phone_idx_8db23f45\"",
+          "i",
+          "I",
+          "\"public\".\"Lead\"",
+          "btree",
+          "[\"phone\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Lead.Lead_status_idx_e98638ab",
+    "label": "Create index \"Lead_status_idx_e98638ab\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Lead_status_idx_e98638ab",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Lead_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_status_idx_e98638ab\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Lead_status_idx_e98638ab\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Lead_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"Lead_status_idx_e98638ab\" ON \"public\".\"Lead\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Lead_status_idx_e98638ab\" exists on \"Lead\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Lead_status_idx_e98638ab\"",
+          "i",
+          "I",
+          "\"public\".\"Lead\"",
+          "btree",
+          "[\"status\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ScoringConfiguration.ScoringConfiguration_active_idx_8af4daed",
+    "label": "Create index \"ScoringConfiguration_active_idx_8af4daed\" on \"ScoringConfiguration\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ScoringConfiguration_active_idx_8af4daed",
+        "table": "ScoringConfiguration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ScoringConfiguration_active_idx_8af4daed\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringConfiguration_active_idx_8af4daed\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ScoringConfiguration_active_idx_8af4daed\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ScoringConfiguration_active_idx_8af4daed\"",
+        "sql": "CREATE INDEX \"ScoringConfiguration_active_idx_8af4daed\" ON \"public\".\"ScoringConfiguration\" (\"active\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ScoringConfiguration_active_idx_8af4daed\" exists on \"ScoringConfiguration\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringConfiguration_active_idx_8af4daed\"",
+          "i",
+          "I",
+          "\"public\".\"ScoringConfiguration\"",
+          "btree",
+          "[\"active\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ScoringCriterion.ScoringCriterion_configurationId_idx_9f879af3",
+    "label": "Create index \"ScoringCriterion_configurationId_idx_9f879af3\" on \"ScoringCriterion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ScoringCriterion_configurationId_idx_9f879af3",
+        "table": "ScoringCriterion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ScoringCriterion_configurationId_idx_9f879af3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringCriterion_configurationId_idx_9f879af3\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"ScoringCriterion_configurationId_idx_9f879af3\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ScoringCriterion_configurationId_idx_9f879af3\"",
+        "sql": "CREATE INDEX \"ScoringCriterion_configurationId_idx_9f879af3\" ON \"public\".\"ScoringCriterion\" (\"configurationId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ScoringCriterion_configurationId_idx_9f879af3\" exists on \"ScoringCriterion\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"ScoringCriterion_configurationId_idx_9f879af3\"",
+          "i",
+          "I",
+          "\"public\".\"ScoringCriterion\"",
+          "btree",
+          "[\"configurationId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Lead.Lead_agentId_fkey",
+    "label": "Add foreign key \"Lead_agentId_fkey\" on \"Lead\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Lead_agentId_fkey",
+        "table": "Lead"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Lead_agentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Lead_agentId_fkey",
+          "public",
+          "\"public\".\"Lead\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Lead_agentId_fkey\" on \"Lead\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Lead_agentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Lead\"\nADD CONSTRAINT \"Lead_agentId_fkey\"\nFOREIGN KEY (\"agentId\")\nREFERENCES \"public\".\"Agent\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Lead_agentId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Lead_agentId_fkey",
+          "public",
+          "\"public\".\"Lead\"",
+          "f",
+          "[\"agentId\"]",
+          "\"public\".\"Agent\"",
+          "[\"id\"]",
+          "a",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.ScoringCriterion.ScoringCriterion_configurationId_fkey",
+    "label": "Add foreign key \"ScoringCriterion_configurationId_fkey\" on \"ScoringCriterion\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "ScoringCriterion_configurationId_fkey",
+        "table": "ScoringCriterion"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"ScoringCriterion_configurationId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "ScoringCriterion_configurationId_fkey",
+          "public",
+          "\"public\".\"ScoringCriterion\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"ScoringCriterion_configurationId_fkey\" on \"ScoringCriterion\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"ScoringCriterion_configurationId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"ScoringCriterion\"\nADD CONSTRAINT \"ScoringCriterion_configurationId_fkey\"\nFOREIGN KEY (\"configurationId\")\nREFERENCES \"public\".\"ScoringConfiguration\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"ScoringCriterion_configurationId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "ScoringCriterion_configurationId_fkey",
+          "public",
+          "\"public\".\"ScoringCriterion\"",
+          "f",
+          "[\"configurationId\"]",
+          "\"public\".\"ScoringConfiguration\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  }
+]
